@@ -9,12 +9,15 @@ from botocore.client import Config
 
 app = Flask(__name__)
 
-DBHOST = os.environ.get("DBHOST") or "localhost"
-DBUSER = os.environ.get("DBUSER") or "root"
-DBPWD = os.environ.get("DBPWD") or "passwors"
-DATABASE = os.environ.get("DATABASE") or "employees"
-COLOR_FROM_ENV = os.environ.get('APP_COLOR') or "pink"
+DBHOST = os.environ.get("DBHOST")
+DBUSER = os.environ.get("DBUSER")
+DBPWD = os.environ.get("DBPWD")
+DATABASE = os.environ.get("DATABASE")
+COLOR_FROM_ENV = os.environ.get('APP_COLOR')
 DBPORT = int(os.environ.get("DBPORT"))
+BUCKET_NAME = os.environ.get("BUCKET_NAME")
+OBJECT_KEY = os.environ.get("OBJECT_KEY")
+LOCAL_FILE_PATH = os.environ.get("LOCAL_FILE_PATH")
 
 # Create a connection to the MySQL database
 db_conn = connections.Connection(
@@ -46,10 +49,10 @@ session = boto3.Session()
 client = session.client('s3')
 
 # Download the S3 object to a local file
-bucket_name = 's3-fp'
-object_key = 'kubernetes.svg'
-local_file_path = '/app/static/kubernetes.svg'
-client.download_file(bucket_name, object_key, local_file_path)
+# bucket_name = 's3-fp'
+# object_key = 'kubernetes.svg'
+# local_file_path = '/app/static/kubernetes.svg'
+client.download_file(BUCKET_NAME, OBJECT_KEY, LOCAL_FILE_PATH)
 
 # Create a string of supported colors
 SUPPORTED_COLORS = ",".join(color_codes.keys())
