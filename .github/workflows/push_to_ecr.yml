@@ -31,12 +31,21 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY_DB: mysql
         ECR_REPOSITORY_APP: web
-        IMAGE_TAG: updated
+        IMAGE_TAG: final
       run: |
+        cd application
         ls -ltra
         # Docker build
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_APP:$IMAGE_TAG -f Dockerfile .
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_DB:$IMAGE_TAG -f Dockerfile_mysql .
+        
+        # Unit test
+        docker network create final
+        docker run -d --name db --net final -e MYSQL_ROOT_PASSWORD=pw $ECR_REGISTRY/$ECR_REPOSITORY_DB:$IMAGE_TAG
+        docker run -d -p 80:81 -e DBHOST=172.18.0.2 -e DBUSER=root -e DBPWD=pw -e DBPORT=3306 -e APP_PORT=81 -e BUCKET_NAME=s3-fp -e OBJECT_KEY=images/kubernetes.svg -e LOCAL_FILE_NAME=kubernetes.svg --name app --net final $ECR_REGISTRY/$ECR_REPOSITORY_APP:$IMAGE_TAG
+        docker ps -a
+        sleep 10
+        curl localhost -vvv
         
         # Docker push
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_DB:$IMAGE_TAG
